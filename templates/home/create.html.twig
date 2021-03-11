@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Annonce {% endblock %}
+
+{% block body %}
+	<h1>Crée votre annonce</h1>
+{# Formulaire twig #}
+    {{ form_start(formAnnonces) }}
+{# Possibilité de modifier dans le formulaire l'affichage, à l'interieure des balises twig start et end #}
+    {{ form_widget(formAnnonces) }}
+{# button du formulaire #}
+    <button type="submit" class="btn btn-secondary">Ajouter l'annonce</button>
+    {{ form_end(formAnnonces) }}
+
+{% endblock %}
