@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:disable
 namespace App\Entity;
 
 use App\Repository\AnnoncesRepository;

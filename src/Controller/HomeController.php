@@ -1,9 +1,10 @@
 <?php
-
+// phpcs:disable
 namespace App\Controller;
 
 use App\Entity\Users;
 use App\Entity\Annonces;
+use App\Entity\Categories;
 use App\Form\AnnoncesType;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ManagerRegistry;
@@ -64,34 +65,53 @@ class HomeController extends AbstractController
 
     /**
      * @Route("/home/new", name="home_annonce")
+     */
+    public function createAnnonces( Request $request, ManagerRegistry $manager )
+    {
+        $categories = $this->getDoctrine()->getRepository(Categories::class)->findOneBy(['id'=>1]);
+        if(!$categories){
+          // redirigé vers la page accueil ou affiché une erreur  
+        }
+    
+        $annonces = new Annonces();
+        $annonces->setCategories($categories);
+        return $this->_processAnnonces($annonces, $request, $manager );
+    }
+
+    /**
      * @Route("/home/{id}/edit", name="home_edit")
      */
-    public function form(Annonces $annonces = null, Request $request, ManagerRegistry $managerRegistry)
+    public function editAnnonces(Annonces $annonces = null, Request $request, ManagerRegistry $manager)
     {
-        if(!$annonces) {
-// Relier champ de classe Users a l'objet
-            $annonces = new Annonces();
-        }
-// On recupere le AnnoncesType (modèle)
+    }
+
+    /**
+     * 
+     */
+    private function _processAnnonces(Annonces $annonces = null, Request $request, ManagerRegistry $manager)
+    {
+        
+        // On recupere le AnnoncesType (modèle)
         $form = $this->createForm(AnnoncesType::class, $annonces);
-// Analyse de la requête
+        // Analyse de la requête
         $form->handleRequest($request);
-// Validation du formulaire, si il est valide !
-        if($form->isSubmitted() && $form->isValid()){
-            if(!$annonces->getId()){
-                $annonces->setUsers(new Users());
+        // Validation du formulaire, si il est valide !
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$annonces->getId()) {
+                $annonces->setUsers($this->getUser());
             }
-// Persister l'annonce
-            $managerRegistry->persist($annonces);
-// Envoyer l'annonce
-            $managerRegistry->flush();
-// Au moment de la connexion, on redirige vers la page show(affichage de l'annonce)
+            // Persister l'annonce
+            $manager->getManager()->persist($annonces);
+            // Envoyer l'annonce
+            $manager->getManager()->flush();
+            // Au moment de la connexion, on redirige vers la page show(affichage de l'annonce)
             return $this->redirectToRoute('home_show', ['id' => $annonces->getId()]);
         }
-// On affiche le rendu html
+        // On affiche le rendu html
         return $this->render('home/create.html.twig', [
             'formAnnonces' => $form->createView(),
-            'editMode' => $annonces->getId() !==null
+            // 'editMode' => $annonces->getId() !== null
         ]);
     }
 }
+
