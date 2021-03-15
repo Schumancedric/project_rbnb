@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:disable
 namespace App\Controller;
 
 use App\Entity\Users;

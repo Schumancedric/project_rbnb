@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:disable
 namespace App\Security;
 
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
