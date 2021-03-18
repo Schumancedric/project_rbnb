@@ -3,86 +3,94 @@
 namespace App\Controller;
 
 use App\Entity\Annonces;
-use App\Entity\Categories;
 use App\Form\AnnoncesType;
-use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\AnnoncesRepository;
+use Doctrine\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * @Route("/annonces")
+ */
 class AnnoncesController extends AbstractController
 {
     /**
-     * @Route("/annonces", name="annonces")
+     * @Route("/", name="annonces_index", methods={"GET"})
      */
-    public function index(): Response
+    public function index(AnnoncesRepository $annoncesRepository): Response
     {
         return $this->render('annonces/index.html.twig', [
-            'controller_name' => 'AnnoncesController',
+            'annonces' => $annoncesRepository->findAll(),
         ]);
     }
 
     /**
-     * @Route("/annonces/new", name="annonces_annonce")
+     * @Route("/new", name="annonces_new", methods={"GET","POST"})
      */
-    public function createAnnonces( Request $request, ManagerRegistry $manager )
+    public function new(Request $request, EntityManagerInterface $manager): Response
     {
-        $categories = $this->getDoctrine()->getRepository(Categories::class)->findOneBy(['id'=>1]);
-        if(!$categories){
-          // redirigé vers la page accueil ou affiché une erreur  
-        }
-    
-        $annonces = new Annonces();
-        $annonces->setCategories($categories);
-        return $this->_processAnnonces($annonces, $request, $manager );
-    }
-
-    /**
-     * @Route("/home/{id}/edit", name="home_edit")
-     */
-    public function editAnnonces(Annonces $annonces = null, Request $request, ManagerRegistry $manager)
-    {
-    }
-
-    /**
-     * 
-     */
-    private function _processAnnonces(Annonces $annonces = null, Request $request, ManagerRegistry $manager)
-    {
-        
-        // On recupere le AnnoncesType (modèle)
-        $form = $this->createForm(AnnoncesType::class, $annonces);
-        // Analyse de la requête
+        $annonce = new Annonces();
+        $form = $this->createForm(AnnoncesType::class, $annonce);
         $form->handleRequest($request);
-        // Validation du formulaire, si il est valide !
+
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$annonces->getId()) {
-                $annonces->setUsers($this->getUser());
-            }
-            // Persister l'annonce
-            $manager->getManager()->persist($annonces);
-            // Envoyer l'annonce
-            $manager->getManager()->flush();
-            // Au moment de la connexion, on redirige vers la page show(affichage de l'annonce)
-            return $this->redirectToRoute('annonces_show', ['id' => $annonces->getId()]);
+            $manager = $this->getDoctrine()->getManager();
+            $manager->persist($annonce);
+            $manager->flush();
+
+            return $this->redirectToRoute('annonces_index');
         }
-        // On affiche le rendu html
-        return $this->render('annonces/create.html.twig', [
-            'formAnnonces' => $form->createView(),
-            // 'editMode' => $annonces->getId() !== null
+
+        return $this->render('annonces/new.html.twig', [
+            'annonce' => $annonce,
+            'form' => $form->createView(),
         ]);
     }
 
     /**
-     * @Route("/annonces/{id}/show", name="annonces_show")
-     * @Route ("/annonces/{id}", name="annonces_show", requirements={"id":"\d+"})
+     * @Route("/{id}", name="annonces_show", methods={"GET"})
      */
-    public function show(Annonces $annonces = null, Request $request, ManagerRegistry $manager)
+    public function show(Annonces $annonce): Response
     {
         return $this->render('annonces/show.html.twig', [
-            'title' => 'annonces',
-            'annonces' => $annonces
+            'annonce' => $annonce,
         ]);
+    }
+
+    /**
+     * @Route("/{id}/edit", name="annonces_edit", methods={"GET","POST"})
+     */
+    public function edit(Request $request, Annonces $annonce): Response
+    {
+        $form = $this->createForm(AnnoncesType::class, $annonce);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('annonces_index');
+        }
+
+        return $this->render('annonces/edit.html.twig', [
+            'annonce' => $annonce,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{id}", name="annonces_delete", methods={"DELETE"})
+     */
+    public function delete(Request $request, Annonces $annonce): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$annonce->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($annonce);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('annonces_index');
     }
 }
