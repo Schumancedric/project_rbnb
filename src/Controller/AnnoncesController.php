@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Annonces;
+use App\Entity\Categories;
 use App\Form\AnnoncesType;
 use App\Repository\AnnoncesRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,28 +29,48 @@ class AnnoncesController extends AbstractController
         ]);
     }
 
+
     /**
      * @Route("/new", name="annonces_new", methods={"GET","POST"})
      */
-    public function new(Request $request, EntityManagerInterface $manager): Response
+    public function new(Request $request, ManagerRegistry $manager): Response
     {
-        $annonce = new Annonces();
-        $form = $this->createForm(AnnoncesType::class, $annonce);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $manager = $this->getDoctrine()->getManager();
-            $manager->persist($annonce);
-            $manager->flush();
-
-            return $this->redirectToRoute('annonces_index');
+        $categories = $this->getDoctrine()->getRepository(Categories::class)->findOneBy(['id'=>1]);
+        if(!$categories){
+          // redirigé vers la page accueil ou affiché une erreur  
         }
 
+        $annonces = new Annonces();
+        $annonces->setCategories($categories);
+        return $this->createAnnonces($annonces, $request, $manager );
+    }
+
+
+
+    private function createAnnonces(Annonces $annonces = null, Request $request, ManagerRegistry $manager)
+    {
+        // On recupere le AnnoncesType (modèle)
+        $form = $this->createForm(AnnoncesType::class, $annonces);
+        // Analyse de la requête
+        $form->handleRequest($request);
+        // Validation du formulaire, si il est valide !
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$annonces->getId()) {
+                $annonces->setUsers($this->getUser());
+            }
+            // Persister l'annonce
+            $manager->getManager()->persist($annonces);
+            // Envoyer l'annonce
+            $manager->getManager()->flush();
+            // Au moment de la connexion, on redirige vers la page show(affichage de l'annonce)
+            return $this->redirectToRoute('annonces_show', ['id' => $annonces->getId()]);
+        }
+        // On affiche le rendu html
         return $this->render('annonces/new.html.twig', [
-            'annonce' => $annonce,
             'form' => $form->createView(),
         ]);
     }
+
 
     /**
      * @Route("/{id}", name="annonces_show", methods={"GET"})
@@ -59,6 +81,7 @@ class AnnoncesController extends AbstractController
             'annonce' => $annonce,
         ]);
     }
+
 
     /**
      * @Route("/{id}/edit", name="annonces_edit", methods={"GET","POST"})
@@ -79,6 +102,7 @@ class AnnoncesController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
 
     /**
      * @Route("/{id}", name="annonces_delete", methods={"DELETE"})
