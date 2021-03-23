@@ -3,5 +3,8 @@
 {# Possibilité de modifier dans le formulaire l'affichage, à l'interieure des balises twig start et end #}
     {{ form_widget(form) }}
 {# button du formulaire #}
-    <button type="submit" class="btn btn-secondary">Ajouter l'annonce</button>
+    <button class="btn">{{ button_label|default('Save') }}</button>
+{# button du formulaire #}
+{# <button type="submit" class="btn btn-secondary">Ajouter l'annonce</button> #}
+
 {{ form_end(form) }}

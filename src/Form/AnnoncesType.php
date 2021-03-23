@@ -19,10 +19,10 @@ class AnnoncesType extends AbstractType
             ->add('tel')
             ->add('url')
             ->add('prix')
-            ->add('image1', FileType::class)
-            ->add('image2', FileType::class)
-            ->add('image3', FileType::class)
-            ->add('image4', FileType::class);
+            ->add('image1', FileType::class, array('data_class' => null))
+            ->add('image2', FileType::class, array('data_class' => null))
+            ->add('image3', FileType::class, array('data_class' => null))
+            ->add('image4', FileType::class, array('data_class' => null));
     }
 
     public function configureOptions(OptionsResolver $resolver)
