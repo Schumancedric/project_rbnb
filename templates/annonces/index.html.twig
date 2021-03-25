@@ -37,17 +37,17 @@
                 <td>{{ annonce.image3 }}</td>
                 <td>{{ annonce.image4 }}</td>
                 <td>
-                    <a href="{{ path('annonces_show', {'id': annonce.id}) }}">show</a>
-                    <a href="{{ path('annonces_edit', {'id': annonce.id}) }}">edit</a>
+                    <a href="{{ path('annonces_show', {'id': annonce.id}) }}" class="btn btn-secondary">Afficher</a>
+                    <a href="{{ path('annonces_edit', {'id': annonce.id}) }}" class="btn btn-warning">Modifier</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="12">no records found</td>
+                <td colspan="12">Aucune annonce enregistrer</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('annonces_new') }}">Create new</a>
+    <a href="{{ path('annonces_new') }}" class="btn btn-secondary">Create new</a>
 {% endblock %}

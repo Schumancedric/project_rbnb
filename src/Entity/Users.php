@@ -50,6 +50,11 @@ class Users implements UserInterface
      */
     private $annonces;
 
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $roles = [];
+
     public function __construct()
     {
         $this->annonces = new ArrayCollection();
@@ -109,7 +114,11 @@ class Users implements UserInterface
     // identification des methodes
     public function getRoles()
     {
-        return ['ROLE_USER'];
+    // recuperer le roles de user
+        $roles = $this->roles;
+    // on push le role_user
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
     }
 
     /**
@@ -138,6 +147,13 @@ class Users implements UserInterface
                 $annonce->setUsers(null);
             }
         }
+
+        return $this;
+    }
+
+    public function setRoles(?array $roles): self
+    {
+        $this->roles = $roles;
 
         return $this;
     }

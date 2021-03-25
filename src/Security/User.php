@@ -8,6 +8,9 @@ class User implements UserInterface
 {
     private $email;
 
+    /**
+     * @ORM\Column(type="json")
+     */
     private $roles = [];
 
     /**

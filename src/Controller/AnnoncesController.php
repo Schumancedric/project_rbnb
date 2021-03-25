@@ -7,12 +7,11 @@ use App\Entity\Categories;
 use App\Form\AnnoncesType;
 use App\Repository\AnnoncesRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\ObjectManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/annonces")
@@ -20,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class AnnoncesController extends AbstractController
 {
     /**
+     * @isGranted("ROLE_EDITOR")
      * @Route("/", name="annonces_index", methods={"GET"})
      */
     public function index(AnnoncesRepository $annoncesRepository): Response
@@ -33,6 +33,7 @@ class AnnoncesController extends AbstractController
 
 
     /**
+     * @isGranted("ROLE_EDITOR")
      * @Route("/new", name="annonces_new", methods={"GET","POST"})
      */
     public function new(Request $request, ManagerRegistry $manager): Response
@@ -75,6 +76,7 @@ class AnnoncesController extends AbstractController
 
 
     /**
+     * @isGranted("ROLE_EDITOR")
      * @Route("/{id}", name="annonces_show", methods={"GET"})
      */
     public function show(Annonces $annonce): Response
@@ -88,6 +90,7 @@ class AnnoncesController extends AbstractController
 
 
     /**
+    * @isGranted("ROLE_ADMIN","ROLE_EDITOR")
     * @Route("/{id}", name="annonces_delete", methods={"DELETE"})
     */
     public function delete(Request $request, Annonces $annonce): Response
@@ -105,6 +108,7 @@ class AnnoncesController extends AbstractController
 
     
     /**
+     * @isGranted("ROLE_EDITOR")
      * @Route("/{id}/edit", name="annonces_edit", methods={"GET","POST"})
      */
     public function edit(Annonces $annonces, Request $request, ManagerRegistry $manager): Response

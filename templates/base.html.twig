@@ -20,14 +20,11 @@
 
 {############################################ NAVBAR ##############################################}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-{# chemin non definie #}
-	<a class="navbar-brand">
-		<font style="vertical-align: inherit;">
-			<font style="vertical-align: inherit;">
-				RBN'B
-			</font>
-		</font>
-	</a>
+{# Titre site #}
+				<a class="navbar-brand">
+					RBN'B
+				</a>
+{# toggler icon !!!! PARAMETER !!!! #}	
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="# navbarColor02" aria-controls="navbarColor02" aria-extended="false" aria-label="Basculer la navigation ">
 		<span class="navbar-toggler-icon"></span>
 	</button>
@@ -37,45 +34,57 @@
 			<li class="nav-item active">
 {# chemin accédant a la page ZONE de notre site (interpolation de l'URL) #}
 				<a class="nav-link" href="{{ path('index') }}">
-					<font style="vertical-align: inherit;">
-						<font style="vertical-align: inherit;">
-							Home
-						</font>
-					</font>
+					Home
 				</a>
 			</li>
+			
 			<li class="nav-item">
 {# chemin accédant a la page HOME de notre site (interpolation de l'URL) #}
 				<a class="nav-link" href="{{ path('home') }}">
-					<font style="vertical-align: inherit;">
-						<font style="vertical-align: inherit;">
-							Qui sommes nous ?
-						</font>
-					</font>
+					Qui sommes nous ?
 				</a>
 			</li>
+
 {#### Boucle d'affichage du button dans navbar ####}
 			{% if not app.user %}
             <li class='nav-item'>
-    {# Affichage du lien dans la navbar (interpolation de l'URL) #}
-                <a href="{{ path('security_login') }}" class="nav-link">Connexion</a>
+{# Affichage du lien dans la navbar (interpolation de l'URL) #}
+                <a href="{{ path('security_login') }}" class="nav-link">
+					Connexion
+				</a>
             </li>
             {% else %}
             <li class='nav-item'>
     {# Affichage du lien dans la navbar (interpolation de l'URL) #}
-                <a href="{{ path('security_logout') }}" class="nav-link">Déconnexion</a>
+                <a href="{{ path('security_logout') }}" class="nav-link">
+					Déconnexion
+				</a>
             </li>
             {% endif %}
+
 			<li class="nav-item">
 {# chemin accédant a la page ANNONCES de notre site (interpolation de l'URL) #}
 				<a class="nav-link" href="{{ path('annonces_index') }}">
-					<font style="vertical-align: inherit;">
-						<font style="vertical-align: inherit;">
-							Déposer votre annonce
-						</font>
-					</police>
+					Déposer votre annonce
 				</a>
 			</li>
+
+			{% if is_granted('ROLE_USER') %}
+			<li class="nav-item">
+{# chemin accédant a la page PROFIL de notre site si un utilisateur est connecter alors affichage du link profil (interpolation de l'URL) #}
+				<a class="nav-link" href="#" tabinex="-1" aria-disabled="true">
+					PROFIL
+				</a>
+			</li>
+			{% endif %}
+			{% if is_granted('ROLE_ADMIN') %}
+			<li class="nav-item">
+{# chemin accédant a la page ADMIN de notre site si un admin est connecter alors affichage du link admin (interpolation de l'URL) #}
+				<a class="nav-link" href="{{ path('admin_utilisateurs') }}" tabinex="-1" aria-disabled="true">
+					ADMIN
+				</a>
+			</li>
+			{% endif %}
 		</ul>
 	</div>
 </nav>
@@ -114,12 +123,6 @@
 
 {# Copyright #}
     <p class='bloc text-center'>Copyright © 2021 Just AI™. Tous droits réservés.</p>
-
-
-
-
-
-     
-
-    </body>
+	
+	</body>
 </html>
