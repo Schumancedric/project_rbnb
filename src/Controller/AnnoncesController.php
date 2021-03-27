@@ -2,6 +2,7 @@
 // phpcs:disable
 namespace App\Controller;
 
+use App\Entity\Images;
 use App\Entity\Annonces;
 use App\Entity\Categories;
 use App\Form\AnnoncesType;
@@ -10,8 +11,9 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @Route("/annonces")
@@ -40,7 +42,7 @@ class AnnoncesController extends AbstractController
     {
         $categories = $this->getDoctrine()->getRepository(Categories::class)->findOneBy(['id'=>1]);
         if (!$categories) {
-            // redirigé vers la page accueil ou affiché une erreur
+            // Redirigé vers la page accueil ou affiché une erreur
         }
 
         $annonces = new Annonces();
@@ -50,12 +52,33 @@ class AnnoncesController extends AbstractController
 
     private function createAnnonces(Annonces $annonces = null, Request $request, ManagerRegistry $manager)
     {
-        // On recupere le AnnoncesType (modèle)
+        // On récupère le AnnoncesType (modèle)
         $form = $this->createForm(AnnoncesType::class, $annonces);
         // Analyse de la requête
         $form->handleRequest($request);
         // Validation du formulaire, si il est valide !
         if ($form->isSubmitted() && $form->isValid()) {
+            
+            // On récupère les images
+            $images = $form->get('images')->getData();
+
+            // Boucle sur les images
+            foreach($images as $image){
+                // On génère un nouveau nom de fichier
+                $fichier = md5(uniqid()) . '.' . $image->guessExtension();
+
+                // On copie le fichier dans le uploads
+                $image->move(
+                    $this->getParameter('images_directory'),
+                    $fichier
+                );
+
+                // On stocke l'image dans la base  de données (son nom)
+                $img = new Images();
+                $img->setName($fichier);
+                $annonces->addImage($img);
+            }
+            
             if (!$annonces->getId()) {
                 $annonces->setUsers($this->getUser());
             }
@@ -82,7 +105,7 @@ class AnnoncesController extends AbstractController
     public function show(Annonces $annonce): Response
     {
         return $this->render('annonces/show.html.twig', [
-            'annonce' => $annonce,
+            'annonce' => $annonce
         ]);
     }
 
@@ -90,7 +113,7 @@ class AnnoncesController extends AbstractController
 
 
     /**
-    * @isGranted("ROLE_ADMIN","ROLE_EDITOR")
+    * @isGranted("ROLE_EDITOR")
     * @Route("/{id}", name="annonces_delete", methods={"DELETE"})
     */
     public function delete(Request $request, Annonces $annonce): Response
@@ -116,6 +139,27 @@ class AnnoncesController extends AbstractController
         $form = $this->createForm(AnnoncesType::class, $annonces);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+
+             // On récupère les images
+            $images = $form->get('images')->getData();
+
+            // Boucle sur les images
+            foreach($images as $image){
+                // On génère un nouveau nom de fichier
+                $fichier = md5(uniqid()) . '.' . $image->guessExtension();
+
+                // On copie le fichier dans le uploads
+                $image->move(
+                    $this->getParameter('images_directory'),
+                    $fichier
+                );
+
+                // On stocke l'image dans la base  de données (son nom)
+                $img = new Images();
+                $img->setName($fichier);
+                $annonces->addImage($img);
+            }
+
             $annonces = $form->getData();
             $manager->getManager()->persist($annonces);
             $manager->getManager()->flush();
@@ -126,5 +170,31 @@ class AnnoncesController extends AbstractController
             'form' => $form->createView(),
             'annonce' => $annonces
         ]);
+    }
+
+
+    /**
+     * @isGranted("ROLE_EDITOR")
+     * @Route("/supprime/image/{id}", name="annonces_delete_images", methods={"DELETE"})
+     */
+    public function deleteImage(Images $images, Request $request){
+        $data = json_decode($request->getContent(), true);
+        
+        // On vérifie si le token est valide
+        if($this->isCsrfTokenValid('delete'.$images->getId(), $data['_token'])){
+            $nom = $images->getName();
+            unlink($this->getParameter('images_directory').'/'.$nom);
+
+            // On supprime l'entrée de la base
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($images);
+            $entityManager->flush();
+
+            // On repond en json
+            return new JsonResponse(['success' => 1]);
+        }
+        else {
+            return new JsonResponse(['error' => 'Token Invalide'], 400);
+        }
     }
 }

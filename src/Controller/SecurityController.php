@@ -49,6 +49,9 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    // Prevoir la redirection de la page connection a inscription
+
+    
     /**
      * @Route("/connexion", name="security_login")
      */

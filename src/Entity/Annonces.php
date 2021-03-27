@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AnnoncesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -48,26 +50,6 @@ class Annonces
     private $prix;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $image1;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $image2;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $image3;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $image4;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Categories::class, inversedBy="annonces")
      * @ORM\JoinColumn(nullable=false)
      */
@@ -78,6 +60,16 @@ class Annonces
      * @ORM\JoinColumn(nullable=false)
      */
     private $users;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Images::class, mappedBy="annonces", orphanRemoval=true, cascade={"persist"})
+     */
+    private $images;
+
+    public function __construct()
+    {
+        $this->images = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -156,54 +148,6 @@ class Annonces
         return $this;
     }
 
-    public function getImage1(): ?string
-    {
-        return $this->image1;
-    }
-
-    public function setImage1(string $image1): self
-    {
-        $this->image1 = $image1;
-
-        return $this;
-    }
-
-    public function getImage2(): ?string
-    {
-        return $this->image2;
-    }
-
-    public function setImage2(string $image2): self
-    {
-        $this->image2 = $image2;
-
-        return $this;
-    }
-
-    public function getImage3(): ?string
-    {
-        return $this->image3;
-    }
-
-    public function setImage3(string $image3): self
-    {
-        $this->image3 = $image3;
-
-        return $this;
-    }
-
-    public function getImage4(): ?string
-    {
-        return $this->image4;
-    }
-
-    public function setImage4(string $image4): self
-    {
-        $this->image4 = $image4;
-
-        return $this;
-    }
-
     public function getCategories(): ?Categories
     {
         return $this->categories;
@@ -224,6 +168,36 @@ class Annonces
     public function setUsers(?Users $users): self
     {
         $this->users = $users;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Images[]
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Images $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images[] = $image;
+            $image->setAnnonces($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(Images $image): self
+    {
+        if ($this->images->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getAnnonces() === $this) {
+                $image->setAnnonces(null);
+            }
+        }
 
         return $this;
     }
