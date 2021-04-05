@@ -131,7 +131,6 @@ class AnnoncesController extends AbstractController
 
     
     /**
-     * inclure le mode Role_editor a un nouvelle inscription
      * @isGranted("ROLE_EDITOR")
      * @Route("/{id}/edit", name="annonces_edit", methods={"GET","POST"})
      */

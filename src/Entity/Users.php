@@ -121,6 +121,11 @@ class Users implements UserInterface
         return array_unique($roles);
     }
 
+    // On inclus un role aux nouveaux utilisateurs connecter
+    function addRoles($role) {
+        $this->roles[] = $role;
+    }
+
     /**
      * @return Collection|Annonces[]
      */

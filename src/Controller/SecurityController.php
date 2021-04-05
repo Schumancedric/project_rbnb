@@ -36,6 +36,10 @@ class SecurityController extends AbstractController
             // Modification du hash sur password
             $users->setPassword($hash);
 
+            // On inclus un role aux nouveaux utilisateurs connecter
+            $users->addRoles("ROLE_EDITOR");
+
+            $manager = $this->getDoctrine()->getManager();
             $manager->persist($users);
             $manager->flush();
 
