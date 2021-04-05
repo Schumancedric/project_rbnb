@@ -42,7 +42,7 @@ class AnnoncesController extends AbstractController
     {
         $categories = $this->getDoctrine()->getRepository(Categories::class)->findOneBy(['id'=>1]);
         if (!$categories) {
-            // Redirigé vers la page accueil ou affiché une erreur
+            
         }
 
         $annonces = new Annonces();
@@ -131,6 +131,7 @@ class AnnoncesController extends AbstractController
 
     
     /**
+     * inclure le mode Role_editor a un nouvelle inscription
      * @isGranted("ROLE_EDITOR")
      * @Route("/{id}/edit", name="annonces_edit", methods={"GET","POST"})
      */

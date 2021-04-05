@@ -2,21 +2,25 @@
 // phpcs:disable
 namespace App\Security;
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Entity\LoginAttempt;
+use App\Entity\Users;
+use App\Repository\LoginAttemptRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
-use Symfony\Component\Security\Guard\PasswordAuthenticatedInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Guard\PasswordAuthenticatedInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 
 class UsersAuthenticator extends AbstractFormLoginAuthenticator implements PasswordAuthenticatedInterface
 {
@@ -24,15 +28,19 @@ class UsersAuthenticator extends AbstractFormLoginAuthenticator implements Passw
 
     public const LOGIN_ROUTE = 'app_login';
 
+    private $entityManager;
     private $urlGenerator;
     private $csrfTokenManager;
     private $passwordEncoder;
+    private $loginAttemptRepository;
 
-    public function __construct(UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder, LoginAttemptRepository $loginAttemptRepository)
     {
+        $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
+        $this->loginAttemptRepository = $loginAttemptRepository;
     }
 
     public function supports(Request $request)
@@ -53,6 +61,12 @@ class UsersAuthenticator extends AbstractFormLoginAuthenticator implements Passw
             $credentials['email']
         );
 
+        // Début de notre modification: on sauvegarde une tentative de connexion
+        $newLoginAttempt = new LoginAttempt($request->getClientIp(), $credentials['email']);
+
+        $this->entityManager->persist($newLoginAttempt);
+        $this->entityManager->flush();
+
         return $credentials;
     }
 
@@ -65,18 +79,28 @@ class UsersAuthenticator extends AbstractFormLoginAuthenticator implements Passw
 
         // Load / create our user however you need.
         // You can do this by calling the user provider, or with custom logic here.
-        $user = $userProvider->loadUserByUsername($credentials['email']);
+        $username = $this->entityManager->getRepository(Users::class)->findOneBy(['email' => $credentials['email']]);
 
-        if (!$user) {
+        if (!$username) {
             // fail authentication with a custom error
             throw new CustomUserMessageAuthenticationException('Email could not be found.');
         }
 
-        return $user;
+        return $username;
     }
 
     public function checkCredentials($credentials, UserInterface $user)
     {
+        // Deuxième modification, la vérification
+        if ($this->loginAttemptRepository->countRecentLoginAttempts($credentials['email']) > 3) {
+            // CustomUserMessageAuthenticationException nous permet de définir nous-même le message,
+            // qui sera affiché à l'utilisateur (ou bien sa clef de traduction).
+            // Attention toutefois à ne pas révéler trop d'informations dans le messages,
+            // notamment ne pas indiquer si le compte existe.
+            throw new CustomUserMessageAuthenticationException('Vous avez essayé de vous connecter avec un mot'
+                .' de passe incorrect de trop nombreuses fois. Veuillez patienter svp avant de ré-essayer.');
+        }
+
         return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
     }
 

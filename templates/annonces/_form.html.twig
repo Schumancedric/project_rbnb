@@ -2,22 +2,24 @@
 {{ form_start(form) }}
 {# Possibilité de modifier dans le formulaire l'affichage, à l'interieure des balises twig start et end #}
     {{ form_widget(form) }}
-    
-    {# Vérification de la route "annonces_edit" on affiche les images#}
+{# Vérification de la route "annonces_edit" on affiche les images#}
         {% if app.request.attributes.get('_route') == 'annonces_edit' %} 
             <h2>Vos images</h2>
-            {% for image in annonce.images %}
-                <div>
-                    <img src="{{ asset('/uploads/' ~ image.name) }}" alt="Image" width="150">
-                    <a href="{{ path('annonces_delete_images', {id: image.id}) }}"
-                    data-delete data-token="{{ csrf_token('delete' ~ image.id) }}">
-                    Supprimer</a>
-                </div>
-            {% endfor %}
+                    {% for image in annonce.images %}
+{# photos #}
+                        <img src="{{ asset('/uploads/' ~ image.name) }}" alt="Image" width="150">
+{# Button supprimer des photos #}
+                        <p class="align-self-center">
+                            <a href="{{ path('annonces_delete_images', {id: image.id}) }}"
+                            data-delete data-token="{{ csrf_token('delete' ~ image.id) }}" class="btn btn-warning">
+                            Supprimer</a>
+                        </p>
+                    {% endfor %}
         {% endif %}
+    
+    <p class="button">
 {# button du formulaire #}
-    <button class="btn btn-secondary">{{ button_label|default('Déposer votre annonce') }}</button>
-{# button du formulaire #}
-    {# <button type="submit" class="btn btn-secondary">Ajouter l'annonce</button> #}
+        <button class="btn btn-success">{{ button_label|default('Déposer votre annonce') }}</button>
+    </p>
 
 {{ form_end(form) }}

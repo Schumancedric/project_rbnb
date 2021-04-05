@@ -17,7 +17,7 @@
             </tr>
         </thead>
         <tbody>
-        {% for annonce in annonces %}
+        {% for annonce in app.user.annonces %}
             <tr>
                 <td>{{ annonce.title }}</td>
                 <td>{{ annonce.description }}</td>
@@ -26,7 +26,7 @@
                 <td>{{ annonce.url }}</td>
                 <td>{{ annonce.prix }}</td>
                 <td>
-                    <a href="{{ path('annonces_show', {'id': annonce.id}) }}" class="btn btn-secondary">Afficher</a>
+                    <a href="{{ path('annonces_show', {'id': annonce.id}) }}" class="btn btn-info">Afficher</a><p></p>
                     <a href="{{ path('annonces_edit', {'id': annonce.id}) }}" class="btn btn-warning">Modifier</a>
                 </td>
             </tr>
@@ -38,5 +38,5 @@
         </tbody>
     </table>
 
-    <a href="{{ path('annonces_new') }}" class="btn btn-secondary">Create new</a>
+    <a href="{{ path('annonces_new') }}" class="btn btn-dark">Create new</a>
 {% endblock %}

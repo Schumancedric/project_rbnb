@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Annonces{% endblock %}
+{% block title %} Edit Annonces {% endblock %}
 
 {% block body %}
     <h1>Modifier votre annonce</h1>
@@ -8,8 +8,10 @@
     {{ include('annonces/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
 
     {{ include('annonces/_delete_form.html.twig') }}
-
-    <a href="{{ path('annonces_index') }}" class="btn btn-primary">Revenir en arrière</a>
+	
+    <p class="button">
+        <a href="{{ path('annonces_index') }}" class="btn btn-info">Revenir en arrière</a>
+    </p>
 {% endblock %}
 
 {% block javascripts %}
