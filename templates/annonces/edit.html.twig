@@ -4,6 +4,11 @@
 
 {% block body %}
     <h1>Modifier votre annonce</h1>
+        {% block javascripts %}
+            <div class="container d-flex justify-content">
+                <script src="{{ asset('js/images.js') }}"></script>
+            </div>
+        {% endblock %}
 
     {{ include('annonces/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
 
@@ -14,6 +19,3 @@
     </p>
 {% endblock %}
 
-{% block javascripts %}
-	<script src="{{ asset('js/images.js') }}"></script>
-{% endblock %}

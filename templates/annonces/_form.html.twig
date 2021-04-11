@@ -5,9 +5,10 @@
 {# Vérification de la route "annonces_edit" on affiche les images#}
         {% if app.request.attributes.get('_route') == 'annonces_edit' %} 
             <h2>Vos images</h2>
+                <div class="container d-flex justify-content-around">
                     {% for image in annonce.images %}
 {# photos #}
-                        <img src="{{ asset('/uploads/' ~ image.name) }}" alt="Image" width="150">
+                        <img src="{{ asset('/uploads/' ~ image.name) }}" alt="Image" width="150" height="auto">
 {# Button supprimer des photos #}
                         <p class="align-self-center">
                             <a href="{{ path('annonces_delete_images', {id: image.id}) }}"
@@ -15,6 +16,7 @@
                             Supprimer</a>
                         </p>
                     {% endfor %}
+                </div>
         {% endif %}
     
     <p class="button">

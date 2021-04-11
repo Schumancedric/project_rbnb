@@ -2,9 +2,15 @@
 
 {% block body %}
     <h1>Inscription pour les propriètaires</h1>
-
+{# On declare le debut du formulaire #}
     {{ form_start(form) }}
+{# L'avantage ici de Form_row, on peut rajouter 
+des parametres de tableau associatif #}
 
+{# label me sert a ecrire en dehors de la ligne #}
+
+{# attr alias attributs options et je lui indique 
+placeholder pour afficher a l'interieur de la ligne #}
 {{ form_row(form.username, 
     {
     'label': 'Nom d\'utilisateur', 

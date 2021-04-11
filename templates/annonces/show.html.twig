@@ -5,10 +5,18 @@
 {% block body %}
     <h1>Annonces</h1>
 
+<div class="container d-flex justify-content-around">
+{# Photos #}
+    {% for image in annonce.images %}
+        <img src="{{ asset('/uploads/' ~ image.name) }}" alt="Image" width="250">
+    {% endfor %}
+</div>
+
+{# Description annonces #}
     <table class="table">
         <tbody>
             <tr>
-                <th>Title</th>
+                <th>Titre</th>
                 <td>{{ annonce.title }}</td>
             </tr>
             <tr>

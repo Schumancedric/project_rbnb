@@ -20,7 +20,7 @@ class AnnoncesType extends AbstractType
             ->add('url')
             ->add('prix')
             ->add('images', FileType::class,[
-                'label' => false,
+                'label' => 'Ajouter des images',
                 'multiple' => true,
                 'mapped' => false,
                 'required' => false

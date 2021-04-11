@@ -8,7 +8,7 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use App\Entity\User;
+use App\Entity\Users;
 
 class UserProvider implements UserProviderInterface
 {
