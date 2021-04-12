@@ -135,37 +135,46 @@ class AnnoncesController extends AbstractController
      * @Route("/{id}/edit", name="annonces_edit", methods={"GET","POST"})
      */
     public function edit(Annonces $annonces, Request $request, ManagerRegistry $manager): Response
-    {
-        $form = $this->createForm(AnnoncesType::class, $annonces);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+    { 
+        // faille de securité contre d'autres utilisateurs qui modifie l'url manuellement
+        $userAnnoncesCreate = $annonces->getUsers()->getId();
+        $userConnecte = $this->getUser()->getId();
 
-             // On récupère les images
-            $images = $form->get('images')->getData();
+        if ($userConnecte != $userAnnoncesCreate ) {
+            return $this->redirectToRoute("home");
+            
+            }else{
+               
+                $form = $this->createForm(AnnoncesType::class, $annonces);
+                $form->handleRequest($request);
+                if ($form->isSubmitted() && $form->isValid()) {
+                    // On récupère les images
+                    $images = $form->get('images')->getData();
 
-            // Boucle sur les images
-            foreach($images as $image){
-                // On génère un nouveau nom de fichier
-                $fichier = md5(uniqid()) . '.' . $image->guessExtension();
+                    // Boucle sur les images
+                    foreach ($images as $image) {
+                        // On génère un nouveau nom de fichier
+                        $fichier = md5(uniqid()) . '.' . $image->guessExtension();
 
-                // On copie le fichier dans le uploads
-                $image->move(
-                    $this->getParameter('images_directory'),
-                    $fichier
-                );
+                        // On copie le fichier dans le uploads
+                        $image->move(
+                            $this->getParameter('images_directory'),
+                            $fichier
+                        );
 
-                // On stocke l'image dans la base  de données (son nom)
-                $img = new Images();
-                $img->setName($fichier);
-                $annonces->addImage($img);
+                        // On stocke l'image dans la base  de données (son nom)
+                        $img = new Images();
+                        $img->setName($fichier);
+                        $annonces->addImage($img);
+                    }
+
+                    $annonces = $form->getData();
+                    $manager->getManager()->persist($annonces);
+                    $manager->getManager()->flush();
+                    $this->addFlash('success', 'les annonces ont été mise à jour');
+                    return $this->redirectToRoute('annonces_show', ['id' => $annonces->getId()]);
+                }
             }
-
-            $annonces = $form->getData();
-            $manager->getManager()->persist($annonces);
-            $manager->getManager()->flush();
-            $this->addFlash('success', 'les annonces ont été mise à jour');
-            return $this->redirectToRoute('annonces_show', ['id' => $annonces->getId()]);
-        }
         return $this->render('annonces/edit.html.twig', [
             'form' => $form->createView(),
             'annonce' => $annonces
