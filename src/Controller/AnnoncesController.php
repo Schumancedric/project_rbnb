@@ -136,7 +136,7 @@ class AnnoncesController extends AbstractController
      */
     public function edit(Annonces $annonces, Request $request, ManagerRegistry $manager): Response
     { 
-        // faille de securité contre d'autres utilisateurs qui modifie l'url manuellement
+        // chemin contre injection url 
         $userAnnoncesCreate = $annonces->getUsers()->getId();
         $userConnecte = $this->getUser()->getId();
 
