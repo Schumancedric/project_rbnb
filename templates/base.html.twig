@@ -68,13 +68,15 @@
 					Déposer votre annonce
 				</a>
 			</li>
-
+{#### Boucle d'affichage du button dans navbar ####}
+			{% if not app.user %}
 			<li class="nav-item">
 {# chemin accédant a la page Register de notre site (interpolation de l'URL) #}
 				<a class="nav-link" href="{{ path('security_registration') }}">
 					S'inscrire
 				</a>
 			</li>
+			{% endif %}
 
 			{% if is_granted('ROLE_USER') %}
 			<li class="nav-item">
